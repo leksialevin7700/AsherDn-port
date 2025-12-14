@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Excel to JSON Converter</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.21.1/axios.min.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>Excel to JSON Converter</h1>
+    <form id="uploadForm" enctype="multipart/form-data">
+      <input type="file" name="excelFile" id="excelFile" accept=".xlsx, .xls">
+      <button type="submit">Upload and Convert</button>
+    </form>
+    <pre id="jsonOutput"></pre>
+    <button id="copyButton" style="display:none;" onclick="copyToClipboard()">Copy JSON</button>
+  </div>
+
+  <script>
+    document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData();
+      const fileInput = document.getElementById('excelFile');
+      formData.append('excelFile', fileInput.files[0]);
+
+      try {
+        const response = await axios.post('/upload', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+        const jsonOutput = document.getElementById('jsonOutput');
+        jsonOutput.textContent = JSON.stringify(response.data, null, 2);
+        document.getElementById('copyButton').style.display = 'block';
+      } catch (error) {
+        console.error('Error uploading file:', error);
+        alert('Failed to upload file.');
+      }
+    });
+
+    function copyToClipboard() {
+      const jsonOutput = document.getElementById('jsonOutput');
+      navigator.clipboard.writeText(jsonOutput.textContent).then(() => {
+        alert('JSON copied to clipboard.');
+      }, (err) => {
+        console.error('Could not copy text:', err);
+      });
+    }
+  </script>
+</body>
+</html>
